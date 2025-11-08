@@ -8,6 +8,7 @@ import { categorySpendRouter } from './routes/category-spend';
 import { cashOutflowRouter } from './routes/cash-outflow';
 import { invoicesRouter } from './routes/invoices';
 import { chatRouter } from './routes/chat';
+import { seedRouter } from './routes/seed';
 
 dotenv.config();
 
@@ -96,6 +97,7 @@ app.use('/api/category-spend', categorySpendRouter);
 app.use('/api/cash-outflow', cashOutflowRouter);
 app.use('/api/invoices', invoicesRouter);
 app.use('/api/chat-with-data', chatRouter);
+app.use('/api/seed', seedRouter);
 
 // Listen on all interfaces (0.0.0.0) for Render deployment
 app.listen(PORT, '0.0.0.0', () => {
