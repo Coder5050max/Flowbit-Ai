@@ -14,5 +14,19 @@ services:
       - key: VANNA_API_BASE_URL
         sync: false
       - key: FRONTEND_URL
+        value: https://flowbit-ai-web.vercel.app
+        sync: false
+
+  - type: web
+    name: flowbit-vanna
+    env: python
+    plan: free
+    rootDir: services/vanna
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: GROQ_API_KEY
         sync: false
 
