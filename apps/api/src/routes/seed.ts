@@ -75,16 +75,18 @@ seedRouter.post('/', async (req, res) => {
     }
 
     // Read the JSON file
-    // In production, the file should be at: apps/api/../../data/Analytics_Test_Data.json
-    // From dist/routes/seed.js, we need to go: ../../../../data/Analytics_Test_Data.json
-    const dataPath = path.join(process.cwd(), 'data', 'Analytics_Test_Data.json');
+    // Try multiple paths since build structure may vary
+    const rootDataPath = path.join(process.cwd(), '../../data/Analytics_Test_Data.json');
+    const altDataPath = path.join(__dirname, '../../../data/Analytics_Test_Data.json');
+    const cwdDataPath = path.join(process.cwd(), 'data/Analytics_Test_Data.json');
     
-    // Also try relative to the built file location
-    const altPath = path.join(__dirname, '../../../data/Analytics_Test_Data.json');
-    
-    let filePath = dataPath;
-    if (!fs.existsSync(filePath)) {
-      filePath = altPath;
+    let filePath: string | null = null;
+    if (fs.existsSync(rootDataPath)) {
+      filePath = rootDataPath;
+    } else if (fs.existsSync(altDataPath)) {
+      filePath = altDataPath;
+    } else if (fs.existsSync(cwdDataPath)) {
+      filePath = cwdDataPath;
     }
     
     if (!filePath) {
