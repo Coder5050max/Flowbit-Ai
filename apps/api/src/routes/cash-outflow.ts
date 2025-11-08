@@ -1,9 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 
 export const cashOutflowRouter = Router();
 
-cashOutflowRouter.get('/', async (req: Request, res: Response) => {
+cashOutflowRouter.get('/', async (req, res) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

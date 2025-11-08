@@ -1,9 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 
 export const invoiceTrendsRouter = Router();
 
-invoiceTrendsRouter.get('/', async (req: Request, res: Response) => {
+invoiceTrendsRouter.get('/', async (req, res) => {
   try {
     // Get ALL invoices from the database (not just current year)
     const invoices = await prisma.invoice.findMany({

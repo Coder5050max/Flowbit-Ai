@@ -1,9 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 
 export const invoicesRouter = Router();
 
-invoicesRouter.get('/', async (req: Request, res: Response) => {
+invoicesRouter.get('/', async (req, res) => {
   try {
     const {
       page = '1',

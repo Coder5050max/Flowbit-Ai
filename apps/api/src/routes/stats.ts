@@ -1,9 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { prisma } from '../lib/prisma';
 
 export const statsRouter = Router();
 
-statsRouter.get('/', async (req: Request, res: Response) => {
+statsRouter.get('/', async (req, res) => {
   try {
     const currentYear = new Date().getFullYear();
     const yearStart = new Date(currentYear, 0, 1);
