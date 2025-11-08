@@ -26,18 +26,22 @@ app.add_middleware(
 # Database connection
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    raise ValueError("DATABASE_URL environment variable is not set")
+    print("WARNING: DATABASE_URL environment variable is not set")
 
 # Parse PostgreSQL URL for psycopg2
-# Format: postgresql+psycopg://user:pass@host:port/dbname
-db_url = DATABASE_URL.replace("postgresql+psycopg://", "postgresql://")
+# Format: postgresql+psycopg://user:pass@host:port/dbname or postgresql://user:pass@host:port/dbname
+if DATABASE_URL:
+    db_url = DATABASE_URL.replace("postgresql+psycopg://", "postgresql://")
+else:
+    db_url = None
 
 # Groq API setup
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 if not GROQ_API_KEY:
-    raise ValueError("GROQ_API_KEY environment variable is not set")
-
-groq_client = Groq(api_key=GROQ_API_KEY)
+    print("WARNING: GROQ_API_KEY environment variable is not set")
+    groq_client = None
+else:
+    groq_client = Groq(api_key=GROQ_API_KEY)
 
 # Database schema information for LLM
 SCHEMA_DESCRIPTION = """
@@ -70,6 +74,8 @@ class QueryResponse(BaseModel):
 
 def execute_sql(sql: str):
     """Execute SQL query and return results"""
+    if not db_url:
+        raise Exception("DATABASE_URL is not configured")
     try:
         conn = psycopg2.connect(db_url)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -86,6 +92,9 @@ def execute_sql(sql: str):
 
 def generate_sql_with_groq(query: str) -> str:
     """Generate SQL using Groq LLM"""
+    if not groq_client:
+        raise Exception("GROQ_API_KEY is not configured")
+    
     prompt = f"""
 You are a SQL expert. Given the following database schema and a natural language query, generate a valid PostgreSQL SQL query.
 
@@ -136,9 +145,30 @@ SQL Query:
         raise Exception(f"Groq API error: {str(e)}")
 
 
+@app.get("/")
+async def root():
+    return {
+        "message": "Vanna AI Query Service",
+        "version": "1.0.0",
+        "endpoints": {
+            "health": "/health",
+            "query": "/query (POST)"
+        },
+        "status": "running" if DATABASE_URL and GROQ_API_KEY else "configured"
+    }
+
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "vanna-ai"}
+    checks = {
+        "service": "vanna-ai",
+        "status": "ok",
+        "database_configured": DATABASE_URL is not None,
+        "groq_configured": GROQ_API_KEY is not None
+    }
+    if not DATABASE_URL or not GROQ_API_KEY:
+        checks["status"] = "warning"
+        checks["message"] = "Some environment variables are missing"
+    return checks
 
 
 @app.post("/query", response_model=QueryResponse)

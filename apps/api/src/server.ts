@@ -46,6 +46,24 @@ app.use(cors({
 
 app.use(express.json());
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Flowbit AI API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      stats: '/api/stats',
+      invoiceTrends: '/api/invoice-trends',
+      vendors: '/api/vendors/top10',
+      categorySpend: '/api/category-spend',
+      cashOutflow: '/api/cash-outflow',
+      invoices: '/api/invoices',
+      chatWithData: '/api/chat-with-data'
+    }
+  });
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
