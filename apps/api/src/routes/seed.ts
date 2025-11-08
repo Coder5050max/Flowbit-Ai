@@ -241,10 +241,19 @@ seedRouter.post('/', async (req, res) => {
           status = 'overdue';
         }
 
+        // Generate unique invoice number if missing or duplicate
+        let invoiceNumber = invoiceData.invoiceId?.value || `INV-${Date.now()}-${processedCount}`;
+        
+        // Ensure invoice number is unique by appending a suffix if needed
+        // We'll handle duplicates in the catch block, but try to make it unique
+        if (!invoiceData.invoiceId?.value) {
+          invoiceNumber = `INV-${Date.now()}-${processedCount}-${Math.random().toString(36).substring(7)}`;
+        }
+        
         // Create invoice
         const invoice = await prisma.invoice.create({
           data: {
-            invoiceNumber: invoiceData.invoiceId?.value || `INV-${Date.now()}-${processedCount}`,
+            invoiceNumber: invoiceNumber,
             vendorId, // Now TypeScript knows vendorId is string (not undefined)
             customerId,
             issueDate: invoiceDate,
@@ -291,11 +300,23 @@ seedRouter.post('/', async (req, res) => {
         });
 
         processedCount++;
-        if (processedCount % 100 === 0) {
+        if (processedCount % 10 === 0) {
           console.log(`✅ Processed ${processedCount} invoices...`);
         }
-      } catch (error) {
-        console.error(`❌ Error processing document ${doc._id}:`, error);
+      } catch (error: any) {
+        const errorMessage = error?.message || String(error);
+        const errorCode = error?.code || 'UNKNOWN';
+        
+        // Handle duplicate invoice number error
+        if (errorCode === 'P2002' || errorMessage.includes('Unique constraint')) {
+          console.warn(`⚠️  Skipping document ${doc._id}: Duplicate invoice number`);
+        } else {
+          console.error(`❌ Error processing document ${doc._id}:`, {
+            code: errorCode,
+            message: errorMessage,
+            invoiceNumber: invoiceData?.invoiceId?.value || 'unknown'
+          });
+        }
         skippedCount++;
       }
     }
