@@ -140,13 +140,14 @@ seedRouter.post('/', async (req, res) => {
         }
 
         // Get or create vendor
-        let vendorId = vendorMap.get(vendorData.vendorName?.value || '');
+        const vendorNameKey = vendorData.vendorName?.value || 'Unknown';
+        let vendorId = vendorMap.get(vendorNameKey);
         if (!vendorId) {
           const vendor = await prisma.vendor.upsert({
-            where: { name: vendorData.vendorName?.value || 'Unknown' },
+            where: { name: vendorNameKey },
             update: {},
             create: {
-              name: vendorData.vendorName?.value || 'Unknown',
+              name: vendorNameKey,
               email: vendorData.vendorEmail?.value || null,
               phone: vendorData.vendorPhone?.value || null,
               address: vendorData.vendorAddress?.value || null,
@@ -154,7 +155,7 @@ seedRouter.post('/', async (req, res) => {
             },
           });
           vendorId = vendor.id;
-          vendorMap.set(vendorData.vendorName?.value || '', vendorId);
+          vendorMap.set(vendorNameKey, vendorId);
         }
 
         // Get or create customer
@@ -171,7 +172,9 @@ seedRouter.post('/', async (req, res) => {
               },
             });
             customerId = customer.id;
-            customerMap.set(customerData.customerName.value, customerId);
+            if (customerId) {
+              customerMap.set(customerData.customerName.value, customerId);
+            }
           }
         }
 
