@@ -11,7 +11,10 @@ chatRouter.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Query is required' });
     }
 
-    const vannaApiUrl = process.env.VANNA_API_BASE_URL || 'http://localhost:8000';
+    let vannaApiUrl = process.env.VANNA_API_BASE_URL || 'http://localhost:8000';
+    
+    // Remove trailing slash if present
+    vannaApiUrl = vannaApiUrl.replace(/\/+$/, '');
     
     console.log('Chat request received:', { query, vannaApiUrl });
 
