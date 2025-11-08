@@ -136,18 +136,31 @@ seedRouter.post('/', async (req, res) => {
 
         // More lenient check - only require invoice and vendor
         if (!invoiceData || !vendorData) {
+          if (processedCount === 0 && skippedCount < 3) {
+            console.log(`Skipping doc ${doc._id}: missing invoiceData or vendorData`, {
+              hasInvoice: !!invoiceData,
+              hasVendor: !!vendorData,
+              hasLlmData: !!llmData
+            });
+          }
           skippedCount++;
           continue;
         }
 
         // Check if vendor has a name
-        if (!vendorData.vendorName?.value) {
+        const vendorName = vendorData.vendorName?.value;
+        if (!vendorName) {
+          if (processedCount === 0 && skippedCount < 3) {
+            console.log(`Skipping doc ${doc._id}: missing vendorName`, {
+              vendorDataKeys: Object.keys(vendorData || {})
+            });
+          }
           skippedCount++;
           continue;
         }
 
         // Get or create vendor
-        const vendorNameKey = vendorData.vendorName?.value || 'Unknown';
+        const vendorNameKey = vendorName || 'Unknown';
         let vendorId: string | undefined = vendorMap.get(vendorNameKey);
         if (!vendorId) {
           const vendor = await prisma.vendor.upsert({
