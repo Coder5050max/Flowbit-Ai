@@ -1,9 +1,9 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 
 export const categorySpendRouter = Router();
 
-categorySpendRouter.get('/', async (req, res) => {
+categorySpendRouter.get('/', async (req: Request, res: Response) => {
   try {
     const lineItems = await prisma.lineItem.findMany({
       where: {

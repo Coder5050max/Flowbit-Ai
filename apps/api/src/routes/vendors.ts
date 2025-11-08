@@ -1,9 +1,9 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 
 export const vendorsRouter = Router();
 
-vendorsRouter.get('/top10', async (req, res) => {
+vendorsRouter.get('/top10', async (req: Request, res: Response) => {
   try {
     const vendors = await prisma.vendor.findMany({
       include: {

@@ -1,9 +1,10 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import dotenv from 'dotenv';
+import fetch from 'node-fetch';
 
 export const chatRouter = Router();
 
-chatRouter.post('/', async (req, res) => {
+chatRouter.post('/', async (req: Request, res: Response) => {
   try {
     const { query } = req.body;
 
@@ -14,7 +15,7 @@ chatRouter.post('/', async (req, res) => {
     const vannaApiUrl = process.env.VANNA_API_BASE_URL || 'http://localhost:8000';
 
     // Proxy request to Vanna AI service
-    const response = await fetch(`${vannaApiUrl}/query`, {
+    const response = await fetch(`${vannaApiUrl}/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
