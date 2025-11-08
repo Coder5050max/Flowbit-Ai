@@ -255,7 +255,21 @@ seedRouter.post('/', async (req, res) => {
             total: summaryData?.invoiceTotal?.value || 0,
             currency: summaryData?.currencySymbol?.value || 'USD',
             lineItems: {
-              create: ((lineItemsData as any)?.items || (lineItemsData as any)?.value?.items || []).map((item: any) => {
+              create: (() => {
+                // Handle different lineItems structures
+                let items: any[] = [];
+                if (lineItemsData) {
+                  if (Array.isArray((lineItemsData as any).items)) {
+                    items = (lineItemsData as any).items;
+                  } else if (Array.isArray((lineItemsData as any).value?.items)) {
+                    items = (lineItemsData as any).value.items;
+                  } else if (Array.isArray((lineItemsData as any).value)) {
+                    items = (lineItemsData as any).value;
+                  } else if (Array.isArray(lineItemsData)) {
+                    items = lineItemsData;
+                  }
+                }
+                return items.map((item: any) => {
                 // Handle both nested .value structure and direct values
                 const description = item.description?.value ?? item.description ?? 'Item';
                 const category = item.Sachkonto?.value ?? item.Sachkonto ?? null;
@@ -270,7 +284,8 @@ seedRouter.post('/', async (req, res) => {
                   unitPrice: typeof unitPrice === 'number' ? unitPrice : 0,
                   amount: typeof amount === 'number' ? amount : 0,
                 };
-              }),
+              });
+              })(),
             },
           },
         });
