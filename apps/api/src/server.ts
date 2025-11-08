@@ -21,21 +21,40 @@ const allowedOrigins = process.env.FRONTEND_URL
     ? [] 
     : ['http://localhost:3000'];
 
+// Log CORS configuration on startup
+console.log('CORS Configuration:');
+console.log('  NODE_ENV:', process.env.NODE_ENV);
+console.log('  FRONTEND_URL:', process.env.FRONTEND_URL);
+console.log('  Allowed Origins:', allowedOrigins);
+
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      console.log('CORS: Allowing request with no origin');
+      return callback(null, true);
+    }
+    
+    console.log(`CORS: Checking origin: ${origin}`);
     
     // In production, only allow specified origins
     if (process.env.NODE_ENV === 'production') {
-      if (allowedOrigins.includes(origin)) {
+      // Normalize origin (remove trailing slash)
+      const normalizedOrigin = origin.replace(/\/$/, '');
+      const normalizedAllowed = allowedOrigins.map(url => url.replace(/\/$/, ''));
+      
+      if (normalizedAllowed.includes(normalizedOrigin) || normalizedAllowed.includes(origin)) {
+        console.log(`CORS: Allowing origin: ${origin}`);
         callback(null, true);
       } else {
-        console.warn(`CORS blocked origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
+        console.error(`CORS: BLOCKED origin: ${origin}`);
+        console.error(`CORS: Allowed origins are: ${JSON.stringify(allowedOrigins)}`);
+        console.error(`CORS: Please set FRONTEND_URL environment variable to: ${origin}`);
+        callback(new Error(`Not allowed by CORS. Origin: ${origin}. Allowed: ${allowedOrigins.join(', ')}`));
       }
     } else {
       // In development, allow all origins
+      console.log(`CORS: Development mode - allowing origin: ${origin}`);
       callback(null, true);
     }
   },
