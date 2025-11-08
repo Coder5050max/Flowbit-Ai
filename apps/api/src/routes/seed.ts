@@ -141,7 +141,7 @@ seedRouter.post('/', async (req, res) => {
 
         // Get or create vendor
         const vendorNameKey = vendorData.vendorName?.value || 'Unknown';
-        let vendorId = vendorMap.get(vendorNameKey);
+        let vendorId: string | undefined = vendorMap.get(vendorNameKey);
         if (!vendorId) {
           const vendor = await prisma.vendor.upsert({
             where: { name: vendorNameKey },
@@ -155,7 +155,9 @@ seedRouter.post('/', async (req, res) => {
             },
           });
           vendorId = vendor.id;
-          vendorMap.set(vendorNameKey, vendorId);
+          if (vendorId) {
+            vendorMap.set(vendorNameKey, vendorId);
+          }
         }
 
         // Get or create customer
@@ -186,6 +188,13 @@ seedRouter.post('/', async (req, res) => {
           ? new Date(paymentData.dueDate.value)
           : null;
 
+        // Ensure vendorId is set (should always be set at this point)
+        if (!vendorId) {
+          console.error('Vendor ID is missing, skipping invoice');
+          skippedCount++;
+          continue;
+        }
+
         // Determine status
         let status = 'pending';
         if (dueDate && dueDate < new Date()) {
@@ -196,7 +205,7 @@ seedRouter.post('/', async (req, res) => {
         const invoice = await prisma.invoice.create({
           data: {
             invoiceNumber: invoiceData.invoiceId?.value || `INV-${Date.now()}-${processedCount}`,
-            vendorId,
+            vendorId, // Now TypeScript knows vendorId is string (not undefined)
             customerId,
             issueDate: invoiceDate,
             dueDate,
