@@ -12,7 +12,7 @@ import { chatRouter } from './routes/chat';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = parseInt(process.env.PORT || '3001', 10);
 
 // CORS configuration - allow frontend URL from environment variable
 const allowedOrigins = process.env.FRONTEND_URL 
