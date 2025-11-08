@@ -4,7 +4,7 @@ services:
     env: node
     plan: free
     rootDir: apps/api
-    buildCommand: cd ../.. && NODE_ENV=development npm install && cd apps/api && NODE_ENV=development npm install && npx prisma generate && npm run build
+    buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
@@ -14,17 +14,5 @@ services:
       - key: VANNA_API_BASE_URL
         sync: false
       - key: FRONTEND_URL
-        sync: false
-  - type: web
-    name: vanna-ai
-    env: python
-    plan: free
-    rootDir: services/vanna
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: DATABASE_URL
-        sync: false
-      - key: GROQ_API_KEY
         sync: false
 
