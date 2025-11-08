@@ -140,6 +140,9 @@ seedRouter.post('/', async (req, res) => {
     let skippedCount = 0;
 
     for (const doc of documents) {
+      let invoiceData: any = null;
+      let invoiceNumber: string = 'unknown';
+      
       try {
         const llmData = doc.extractedData?.llmData;
         if (!llmData) {
@@ -147,7 +150,7 @@ seedRouter.post('/', async (req, res) => {
           continue;
         }
 
-        const invoiceData = llmData.invoice?.value;
+        invoiceData = llmData.invoice?.value;
         const vendorData = llmData.vendor?.value;
         const customerData = llmData.customer?.value;
         const paymentData = llmData.payment?.value;
@@ -242,7 +245,7 @@ seedRouter.post('/', async (req, res) => {
         }
 
         // Generate unique invoice number if missing
-        let invoiceNumber = invoiceData.invoiceId?.value || `INV-${Date.now()}-${processedCount}`;
+        invoiceNumber = invoiceData.invoiceId?.value || `INV-${Date.now()}-${processedCount}`;
         
         // Ensure invoice number is unique by checking if it exists and appending suffix if needed
         let baseInvoiceNumber = invoiceNumber;
