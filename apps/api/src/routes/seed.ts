@@ -112,6 +112,26 @@ seedRouter.post('/', async (req, res) => {
     await prisma.vendor.deleteMany();
 
     console.log(`📦 Processing ${documents.length} documents...`);
+    
+    // Debug: Check first document structure
+    if (documents.length > 0) {
+      const firstDoc = documents[0];
+      console.log('Sample document structure:', {
+        hasExtractedData: !!firstDoc.extractedData,
+        hasLlmData: !!firstDoc.extractedData?.llmData,
+        llmDataKeys: firstDoc.extractedData?.llmData ? Object.keys(firstDoc.extractedData.llmData) : [],
+        hasInvoice: !!firstDoc.extractedData?.llmData?.invoice,
+        hasVendor: !!firstDoc.extractedData?.llmData?.vendor,
+        invoiceStructure: firstDoc.extractedData?.llmData?.invoice ? {
+          hasValue: !!firstDoc.extractedData.llmData.invoice.value,
+          keys: Object.keys(firstDoc.extractedData.llmData.invoice)
+        } : null,
+        vendorStructure: firstDoc.extractedData?.llmData?.vendor ? {
+          hasValue: !!firstDoc.extractedData.llmData.vendor.value,
+          keys: Object.keys(firstDoc.extractedData.llmData.vendor)
+        } : null
+      });
+    }
 
     // Create vendors and customers map to avoid duplicates
     const vendorMap = new Map<string, string>();
