@@ -55,17 +55,33 @@ export async function fetchInvoices(params?: {
 }
 
 export async function chatWithData(query: string) {
-  const res = await fetch(`${API_BASE}/api/chat-with-data`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query }),
-  });
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.error || 'Failed to process query');
+  try {
+    const res = await fetch(`${API_BASE}/api/chat-with-data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query }),
+    });
+    
+    if (!res.ok) {
+      let errorMessage = 'Failed to process query';
+      try {
+        const error = await res.json();
+        errorMessage = error.error || error.details || errorMessage;
+      } catch {
+        errorMessage = `HTTP ${res.status}: ${res.statusText}`;
+      }
+      throw new Error(errorMessage);
+    }
+    
+    return res.json();
+  } catch (error: any) {
+    // Network errors (CORS, connection refused, etc.)
+    if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
+      throw new Error(`Cannot connect to API. Check that NEXT_PUBLIC_API_BASE is set correctly. Current: ${API_BASE}`);
+    }
+    throw error;
   }
-  return res.json();
 }
 
