@@ -283,15 +283,28 @@ seedRouter.post('/', async (req, res) => {
             lineItems: {
               create: (() => {
                 // Handle different lineItems structures
+                // Structure can be: lineItems.value.items.value (array) or lineItems.value.items (array) or lineItems.items (array)
                 let items: any[] = [];
                 if (lineItemsData) {
-                  if (Array.isArray((lineItemsData as any).items)) {
-                    items = (lineItemsData as any).items;
-                  } else if (Array.isArray((lineItemsData as any).value?.items)) {
-                    items = (lineItemsData as any).value.items;
-                  } else if (Array.isArray((lineItemsData as any).value)) {
-                    items = (lineItemsData as any).value;
-                  } else if (Array.isArray(lineItemsData)) {
+                  const ld = lineItemsData as any;
+                  // Try: lineItems.value.items.value (most common structure in the JSON)
+                  if (ld.value?.items?.value && Array.isArray(ld.value.items.value)) {
+                    items = ld.value.items.value;
+                  }
+                  // Try: lineItems.value.items (array directly)
+                  else if (ld.value?.items && Array.isArray(ld.value.items)) {
+                    items = ld.value.items;
+                  }
+                  // Try: lineItems.items (direct array)
+                  else if (ld.items && Array.isArray(ld.items)) {
+                    items = ld.items;
+                  }
+                  // Try: lineItems.value (array directly)
+                  else if (ld.value && Array.isArray(ld.value)) {
+                    items = ld.value;
+                  }
+                  // Try: lineItems itself is an array
+                  else if (Array.isArray(lineItemsData)) {
                     items = lineItemsData;
                   }
                 }
