@@ -20,11 +20,36 @@ export function CategorySpendChart({ data }: { data: CategoryData[] }) {
     }).format(value);
   };
 
+  // Handle empty data
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[300px] text-gray-400">
+        No category data available
+      </div>
+    );
+  }
+
+  // Filter out invalid data and ensure we have valid numbers
+  const validData = data
+    .filter((item) => item && item.category && typeof item.spend === 'number' && item.spend > 0)
+    .map((item) => ({
+      category: item.category || 'Uncategorized',
+      spend: Number(item.spend) || 0,
+    }));
+
+  if (validData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[300px] text-gray-400">
+        No category data available
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
         <Pie
-          data={data}
+          data={validData}
           cx="50%"
           cy="50%"
           labelLine={false}
@@ -34,7 +59,7 @@ export function CategorySpendChart({ data }: { data: CategoryData[] }) {
           dataKey="spend"
           nameKey="category"
         >
-          {data.map((entry, index) => (
+          {validData.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
