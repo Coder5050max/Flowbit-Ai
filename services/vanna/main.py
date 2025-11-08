@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 import os
+import re
 from dotenv import load_dotenv
 from groq import Groq
 import psycopg2
@@ -34,6 +35,10 @@ if not DATABASE_URL:
 if DATABASE_URL:
     # Replace postgresql+psycopg:// with postgresql:// for psycopg2
     db_url = DATABASE_URL.replace("postgresql+psycopg://", "postgresql://")
+    
+    # Remove channel_binding parameter (not supported by psycopg2)
+    # Neon sometimes includes this, but psycopg2 doesn't support it
+    db_url = re.sub(r'[&?]channel_binding=[^&]*', '', db_url)
     
     # Ensure SSL mode is set for cloud providers (Neon, Render, etc.)
     # If sslmode is not in the URL, add it
@@ -88,9 +93,12 @@ def execute_sql(sql: str):
     if not db_url:
         raise Exception("DATABASE_URL is not configured")
     try:
+        # Log the connection string (without password) for debugging
+        safe_url = re.sub(r':([^:@]+)@', ':***@', db_url) if db_url else 'None'
+        print(f"Connecting to database: {safe_url}")
+        
         # Parse connection string and handle SSL properly
         # psycopg2.connect can handle connection strings directly
-        # But we'll use it with proper error handling
         conn = psycopg2.connect(
             db_url,
             connect_timeout=10  # 10 second timeout
@@ -104,11 +112,21 @@ def execute_sql(sql: str):
         # Convert to list of dicts
         return [dict(row) for row in results]
     except psycopg2.OperationalError as e:
-        raise Exception(f"Database connection error: {str(e)}. Check DATABASE_URL and network connectivity.")
+        error_msg = str(e)
+        print(f"Database connection error: {error_msg}")
+        raise Exception(f"Database connection error: {error_msg}. Check DATABASE_URL format and network connectivity.")
+    except psycopg2.ProgrammingError as e:
+        error_msg = str(e)
+        print(f"Database programming error: {error_msg}")
+        raise Exception(f"Database error: {error_msg}")
     except psycopg2.Error as e:
-        raise Exception(f"Database error: {str(e)}")
+        error_msg = str(e)
+        print(f"Database error: {error_msg}")
+        raise Exception(f"Database error: {error_msg}")
     except Exception as e:
-        raise Exception(f"Unexpected error: {str(e)}")
+        error_msg = str(e)
+        print(f"Unexpected error: {error_msg}")
+        raise Exception(f"Unexpected error: {error_msg}")
 
 
 def generate_sql_with_groq(query: str) -> str:
