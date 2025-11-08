@@ -1,0 +1,158 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output/
+*.test.js.snap
+.jest/
+
+# Next.js
+.next/
+out/
+build/
+dist/
+.vercel/
+apps/web/.next/
+apps/web/out/
+apps/web/.vercel/
+
+# TypeScript
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+apps/api/*.tsbuildinfo
+
+# Production / Build outputs
+*.log
+*.pid
+*.seed
+*.pid.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+apps/web/build/
+apps/web/dist/
+apps/api/build/
+apps/api/dist/
+*.map
+*.min.js
+*.min.css
+
+# Environment variables
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+!.env.template
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+*.iml
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+**/venv/
+**/env/
+**/ENV/
+**/.venv/
+services/vanna/venv/
+*.egg-info/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Turbo
+.turbo/
+.turbo-cache/
+
+# Prisma
+# Note: Keep migrations (they should be committed)
+# Only ignore generated client cache
+apps/api/prisma/.prisma/
+*.prisma.bak
+# But keep migrations folder - they should be committed
+!apps/api/prisma/migrations/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Vercel
+.vercel
+
+# Misc
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Keep important files (explicitly - these should be committed)
+!data/Analytics_Test_Data.json
+!package.json
+!package-lock.json
+!apps/*/package.json
+!services/*/requirements.txt
+!docker-compose.yml
+!turbo.json
+!apps/api/prisma/schema.prisma
+!apps/api/prisma/seed.ts
+!apps/api/prisma/migrations/
+
+# Lock files (optional - some teams commit these)
+# Uncomment if you want to ignore lock files
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

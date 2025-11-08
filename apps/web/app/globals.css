@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Figma Design System Colors */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 11%; /* Dark: #1C1C1C */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 11%;
+    --primary: 248 70% 25%; /* Primary Blue: #1B1464 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 20% 90%; /* Navy 60: #E3E6F0 */
+    --secondary-foreground: 0 0% 11%;
+    --muted: 220 20% 90%;
+    --muted-foreground: 215 16% 47%; /* Subtext: #64748B */
+    --accent: 220 20% 90%;
+    --accent-foreground: 248 70% 25%;
+    --destructive: 0 88% 52%; /* Red 10: #ED1C24 */
+    --destructive-foreground: 0 0% 100%;
+    --success: 122 65% 31%; /* Green: #2F9F02 */
+    --success-foreground: 0 0% 100%;
+    --border: 240 10% 90%; /* Border: #E4E4E9 */
+    --input: 240 10% 90%;
+    --ring: 248 70% 25%;
+    --radius: 0.5rem;
+    
+    /* Figma Specific Colors */
+    --figma-dark: #1C1C1C;
+    --figma-subtext: #64748B;
+    --figma-primary-blue: #1B1464;
+    --figma-blue-accent: #314CFF;
+    --figma-green: #2F9F02;
+    --figma-red: #ED1C24;
+    --figma-navy-60: #E3E6F0;
+    --figma-navy-40: #8598B3;
+    --figma-grey-20: #666666;
+    --figma-border: #E4E4E9;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
