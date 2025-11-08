@@ -15,13 +15,11 @@ const nextConfig = {
   },
   // TypeScript configuration
   typescript: {
-    // Temporarily allow build to see actual errors
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   // ESLint configuration
   eslint: {
-    // Temporarily allow build to see actual errors
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
 }
 
