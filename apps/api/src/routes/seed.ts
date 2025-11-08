@@ -331,7 +331,7 @@ seedRouter.post('/', async (req, res) => {
           console.error(`❌ Error processing document ${doc._id}:`, {
             code: errorCode,
             message: errorMessage,
-            invoiceNumber: invoiceData?.invoiceId?.value || 'unknown'
+            invoiceNumber: invoiceNumber
           });
         }
         skippedCount++;
