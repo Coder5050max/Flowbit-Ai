@@ -29,9 +29,20 @@ if not DATABASE_URL:
     print("WARNING: DATABASE_URL environment variable is not set")
 
 # Parse PostgreSQL URL for psycopg2
-# Format: postgresql+psycopg://user:pass@host:port/dbname or postgresql://user:pass@host:port/dbname
+# Handle both formats: postgresql+psycopg:// and postgresql://
+# Neon and most cloud providers require SSL, so we ensure sslmode is set
 if DATABASE_URL:
+    # Replace postgresql+psycopg:// with postgresql:// for psycopg2
     db_url = DATABASE_URL.replace("postgresql+psycopg://", "postgresql://")
+    
+    # Ensure SSL mode is set for cloud providers (Neon, Render, etc.)
+    # If sslmode is not in the URL, add it
+    if "sslmode=" not in db_url:
+        # Add sslmode parameter
+        if "?" in db_url:
+            db_url += "&sslmode=require"
+        else:
+            db_url += "?sslmode=require"
 else:
     db_url = None
 
@@ -77,7 +88,13 @@ def execute_sql(sql: str):
     if not db_url:
         raise Exception("DATABASE_URL is not configured")
     try:
-        conn = psycopg2.connect(db_url)
+        # Parse connection string and handle SSL properly
+        # psycopg2.connect can handle connection strings directly
+        # But we'll use it with proper error handling
+        conn = psycopg2.connect(
+            db_url,
+            connect_timeout=10  # 10 second timeout
+        )
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         cursor.execute(sql)
         results = cursor.fetchall()
@@ -86,8 +103,12 @@ def execute_sql(sql: str):
         
         # Convert to list of dicts
         return [dict(row) for row in results]
-    except Exception as e:
+    except psycopg2.OperationalError as e:
+        raise Exception(f"Database connection error: {str(e)}. Check DATABASE_URL and network connectivity.")
+    except psycopg2.Error as e:
         raise Exception(f"Database error: {str(e)}")
+    except Exception as e:
+        raise Exception(f"Unexpected error: {str(e)}")
 
 
 def generate_sql_with_groq(query: str) -> str:
@@ -163,11 +184,28 @@ async def health():
         "service": "vanna-ai",
         "status": "ok",
         "database_configured": DATABASE_URL is not None,
-        "groq_configured": GROQ_API_KEY is not None
+        "groq_configured": GROQ_API_KEY is not None,
+        "database_connected": False
     }
+    
+    # Test database connection if configured
+    if DATABASE_URL and db_url:
+        try:
+            conn = psycopg2.connect(db_url, connect_timeout=5)
+            conn.close()
+            checks["database_connected"] = True
+        except Exception as e:
+            checks["database_connected"] = False
+            checks["database_error"] = str(e)
+            checks["status"] = "error"
+    
     if not DATABASE_URL or not GROQ_API_KEY:
         checks["status"] = "warning"
         checks["message"] = "Some environment variables are missing"
+    elif not checks.get("database_connected", False):
+        checks["status"] = "error"
+        checks["message"] = "Database connection failed"
+    
     return checks
 
 
