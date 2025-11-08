@@ -222,7 +222,7 @@ seedRouter.post('/', async (req, res) => {
             total: summaryData?.invoiceTotal?.value || 0,
             currency: summaryData?.currencySymbol?.value || 'USD',
             lineItems: {
-              create: (lineItemsData?.items || lineItemsData?.value?.items || []).map((item: any) => {
+              create: ((lineItemsData as any)?.items || (lineItemsData as any)?.value?.items || []).map((item: any) => {
                 // Handle both nested .value structure and direct values
                 const description = item.description?.value ?? item.description ?? 'Item';
                 const category = item.Sachkonto?.value ?? item.Sachkonto ?? null;
