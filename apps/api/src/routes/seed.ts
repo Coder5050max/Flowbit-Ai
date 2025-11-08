@@ -241,13 +241,27 @@ seedRouter.post('/', async (req, res) => {
           status = 'overdue';
         }
 
-        // Generate unique invoice number if missing or duplicate
+        // Generate unique invoice number if missing
         let invoiceNumber = invoiceData.invoiceId?.value || `INV-${Date.now()}-${processedCount}`;
         
-        // Ensure invoice number is unique by appending a suffix if needed
-        // We'll handle duplicates in the catch block, but try to make it unique
-        if (!invoiceData.invoiceId?.value) {
-          invoiceNumber = `INV-${Date.now()}-${processedCount}-${Math.random().toString(36).substring(7)}`;
+        // Ensure invoice number is unique by checking if it exists and appending suffix if needed
+        let baseInvoiceNumber = invoiceNumber;
+        let suffix = 1;
+        while (true) {
+          const existing = await prisma.invoice.findUnique({
+            where: { invoiceNumber: invoiceNumber }
+          });
+          if (!existing) {
+            break; // Invoice number is unique, we can use it
+          }
+          // Invoice number exists, append suffix
+          invoiceNumber = `${baseInvoiceNumber}-${suffix}`;
+          suffix++;
+          if (suffix > 1000) {
+            // Safety check to avoid infinite loop
+            invoiceNumber = `${baseInvoiceNumber}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+            break;
+          }
         }
         
         // Create invoice
