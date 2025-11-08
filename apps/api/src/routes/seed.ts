@@ -134,7 +134,14 @@ seedRouter.post('/', async (req, res) => {
         const summaryData = llmData.summary?.value;
         const lineItemsData = llmData.lineItems?.value;
 
-        if (!invoiceData || !vendorData || !summaryData) {
+        // More lenient check - only require invoice and vendor
+        if (!invoiceData || !vendorData) {
+          skippedCount++;
+          continue;
+        }
+
+        // Check if vendor has a name
+        if (!vendorData.vendorName?.value) {
           skippedCount++;
           continue;
         }
@@ -210,18 +217,27 @@ seedRouter.post('/', async (req, res) => {
             issueDate: invoiceDate,
             dueDate,
             status,
-            subtotal: summaryData.subTotal?.value || 0,
-            tax: summaryData.totalTax?.value || 0,
-            total: summaryData.invoiceTotal?.value || 0,
-            currency: summaryData.currencySymbol?.value || 'USD',
+            subtotal: summaryData?.subTotal?.value || 0,
+            tax: summaryData?.totalTax?.value || 0,
+            total: summaryData?.invoiceTotal?.value || 0,
+            currency: summaryData?.currencySymbol?.value || 'USD',
             lineItems: {
-              create: (lineItemsData?.items || []).map((item: any) => ({
-                description: item.description?.value || 'Item',
-                category: item.Sachkonto?.value || null,
-                quantity: item.quantity?.value || 1,
-                unitPrice: item.unitPrice?.value || 0,
-                amount: item.totalPrice?.value || 0,
-              })),
+              create: (lineItemsData?.items || lineItemsData?.value?.items || []).map((item: any) => {
+                // Handle both nested .value structure and direct values
+                const description = item.description?.value ?? item.description ?? 'Item';
+                const category = item.Sachkonto?.value ?? item.Sachkonto ?? null;
+                const quantity = item.quantity?.value ?? item.quantity ?? 1;
+                const unitPrice = item.unitPrice?.value ?? item.unitPrice ?? 0;
+                const amount = item.totalPrice?.value ?? item.totalPrice ?? item.amount ?? 0;
+                
+                return {
+                  description: typeof description === 'string' ? description : 'Item',
+                  category: typeof category === 'string' ? category : null,
+                  quantity: typeof quantity === 'number' ? quantity : 1,
+                  unitPrice: typeof unitPrice === 'number' ? unitPrice : 0,
+                  amount: typeof amount === 'number' ? amount : 0,
+                };
+              }),
             },
           },
         });
